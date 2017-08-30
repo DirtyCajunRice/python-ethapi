@@ -1,103 +1,69 @@
-from decorator import decorator
-
 import ethapi.eth as eth
-import ethapi.exceptions as exceptions
 
+class Pool(eth.Eth):
 
-@decorator
-def miner_id_required(f, *args, **kwargs):
-    """
-    Decorator helper function to ensure some methods aren't needlessly called
-    without a miner configured.
-    """
-    try:
-        if args[0].miner_id is None:
-            raise AttributeError('Parameter miner_id is required.')
-    except AttributeError:
-        raise AttributeError('Parameter miner_id is required.')
-
-    return f(*args, **kwargs)
-
-
-@decorator
-def worker_id_required(f, *args, **kwargs):
-    """
-    Decorator helper function to ensure some methods aren't needlessly called
-    without a worker configured.
-    """
-    try:
-        if args[0].worker_id is None:
-            raise AttributeError('Parameter worker_id is required.')
-    except AttributeError:
-        raise AttributeError('Parameter worker_id is required.')
-
-    return f(*args, **kwargs)
-
-
-def check_required_args(required_args, args):
-    """
-    Checks if all required_args have a value.
-    :param required_args: list of required args
-    :param args: kwargs
-    :return: True (if an exception isn't raised)
-    """
-    for arg in required_args:
-        if arg not in args:
-            raise KeyError('Required argument: %s' % arg)
-    return True
-
-
-class Api(eth.Eth):
-    """
-    Base class that extends ethapi and defaults API methods to
-    unimplemented.
-    """
     def __init__(self, **kwargs):
-        super(Api, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
-    # Default to unimplemented methods
-    def get(self, **kwargs):
-        raise exceptions.UnimplementedException
-
-
-class PoolStats(Api):
-    """
-    /poolStats API endpoint
-    """
-    def __init__(self, **kwargs):
-        super(PoolStats, self).__init__(**kwargs)
-
-    def get(self, **kwargs):
-        """
-        https://api.ethermine.org/docs/#api-Pool-poolStats
-        """
-        return self._get('poolStats')
-
-
-class NetworkStats(Api):
-    """
-    /networkStats API endpoint
-    """
-    def __init__(self, **kwargs):
-        super(NetworkStats, self).__init__(**kwargs)
-
-    def get(self, **kwargs):
-        """
-        https://api.ethermine.org/docs/#api-Pool-networkStat
-        """
+    def networkstats(self):
         return self._get('networkStats')
 
+    def poolstats(self):
+        return self._get('poolStats')
 
-class Miner(Api):
-    """
-    /miner API endpoint
-    """
+    def credits(self):
+        return self._get('credits')
+
+
+class Servers(eth.Eth):
+
     def __init__(self, **kwargs):
-        super(Miner, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
-    @miner_id_required
-    def get(self, miner_id=None, end=None):
-        """
-        https://api.ethermine.org/docs/#api-Miner
-        """
-        return self._get('miner/%s/%s' % (miner_id, end))
+    def history(self):
+        return self._get('servers/history')
+
+
+class Blocks(eth.Eth):
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def history(self):
+        return self._get('blocks/history')
+
+
+class Miner(eth.Eth):
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def history(self, miner_id):
+        return self._get('miner/' + miner_id + '/history')
+
+    def payouts(self, miner_id):
+        return self._get('miner/' + miner_id + '/payouts')
+
+    def rounds(self, miner_id):
+        return self._get('miner/' + miner_id + '/rounds')
+
+    def settings(self, miner_id):
+        return self._get('miner/' + miner_id + '/settings')
+
+    def currentstats(self, miner_id):
+        return self._get('miner/' + miner_id + '/currentStats')
+
+
+class Worker(eth.Eth):
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def workers(self, miner_id):
+        return self._get('miner/' + miner_id + '/workers')
+
+    def history(self, miner_id, worker_id):
+        return self._get('miner/' + miner_id + '/worker/' + worker_id + '/history')
+
+    def currentstats(self, miner_id, worker_id):
+        return self._get('miner/' + miner_id + '/worker/' + worker_id + '/currentStats')
