@@ -1,3 +1,9 @@
+from decorator import decorator
+
+import ethapi.eth as eth
+import ethapi.exceptions as exceptions
+
+
 @decorator
 def miner_id_required(f, *args, **kwargs):
     """
@@ -11,6 +17,7 @@ def miner_id_required(f, *args, **kwargs):
         raise AttributeError('Parameter miner_id is required.')
 
     return f(*args, **kwargs)
+
 
 @decorator
 def worker_id_required(f, *args, **kwargs):
